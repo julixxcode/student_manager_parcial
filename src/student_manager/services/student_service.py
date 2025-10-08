@@ -28,3 +28,36 @@ def modify_student(student_id, **kwargs):
 def remove_student(student_id: str):
     """Elimina un estudiante del archivo JSON."""
     return student_repo.delete_student(student_id)
+def filter_students(career: str = None, status: str = None) -> list:
+    """
+    Filtra estudiantes por carrera o estado académico.
+    - career: nombre de la carrera (opcional)
+    - status: 'Aprobado' o 'Reprobado' (opcional)
+    """
+    students = student_repo.get_all_students()
+
+    if career:
+        students = [s for s in students if s["career"].lower() == career.lower()]
+
+    if status:
+        students = [s for s in students if s["status"].lower() == status.lower()]
+
+    return students
+
+
+def get_statistics() -> dict:
+    """Devuelve estadísticas globales del sistema."""
+    students = student_repo.get_all_students()
+    if not students:
+        return {"total": 0, "average": 0, "approved": 0, "reproved": 0}
+
+    total = len(students)
+    avg = round(sum(s["average"] for s in students) / total, 2)
+    approved = len([s for s in students if s["status"] == "Aprobado"])
+    reproved = total - approved
+    return {
+        "total": total,
+        "average": avg,
+        "approved": approved,
+        "reproved": reproved
+    }
