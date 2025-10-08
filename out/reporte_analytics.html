@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reporte Académico</title>
+<style>
+ body { font-family: Arial, sans-serif; margin: 20px; }
+ h1, h2 { margin: 0.4rem 0; }
+ .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+ table { border-collapse: collapse; width: 100%; }
+ th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+ th { background: #f6f6f6; }
+ small { color: #666; }
+ img { max-width: 100%; height: auto; border: 1px solid #eee; }
+</style>
+</head>
+<body>
+  <h1>Reporte Académico</h1>
+  <small>Generado: 2025-10-08 12:43</small>
+
+  <h2>Promedio por carrera</h2>
+  <img src="avg_by_career.png" alt="Promedio por carrera">
+
+  <h2>Top 10 estudiantes </h2>
+  <div class="grid">
+    <div>
+      <img src="top_students.png" alt="Top estudiantes">
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>#</th><th>Nombre</th><th>Carrera</th><th>Promedio</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Sofi</td><td>Diseño</td><td>4.85</td></tr>
+<tr><td>2</td><td>María</td><td>Industrial</td><td>4.70</td></tr>
+<tr><td>3</td><td>Ana</td><td>Sistemas</td><td>4.50</td></tr>
+<tr><td>4</td><td>Luis</td><td>Sistemas</td><td>4.00</td></tr>
+<tr><td>5</td><td>Carlos</td><td>Industrial</td><td>3.60</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
