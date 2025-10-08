@@ -17,3 +17,17 @@ def test_group_ranges():
     g = group_by_ranges(s(), bins)
     assert "4.0-5.0" in g
     assert any(r.name == "Cata" for r in g["4.0-5.0"])
+def test_filter_by_average_with_upper_limit():
+    data = s()
+    res = filter_by_average(data, max_avg=3.5)
+    assert all(r.average <= 3.5 for r in res)
+
+def test_group_by_ranges_edge_cases():
+    data = s()
+    bins = [(0, 3.0), (3.0, 4.0), (4.0, 5.0)]
+    grouped = group_by_ranges(data, bins)
+    # Todos los bins deben existir
+    assert all(isinstance(v, list) for v in grouped.values())
+    total_students = sum(len(v) for v in grouped.values())
+    # No deben perderse estudiantes
+    assert total_students == len(data)

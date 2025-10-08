@@ -14,3 +14,17 @@ def test_history_summary_stats():
     ])
     summary = history_summary(s)
     assert summary["average"] == 3.75
+def test_history_empty_student():
+    s = SimpleNamespace(id=3, name="Vacío", grades=[])
+    result = history_summary(s)
+    assert result["count"] == 0
+    assert result["average"] == 0
+
+def test_history_invalid_grade_type():
+    s = SimpleNamespace(id=4, name="Erróneo", history=[{"term": "T1", "course": "Test", "grade": "no-numero"}])
+    # Debe lanzar ValueError o convertir a float sin error
+    try:
+        summary = history_summary(s)
+        assert "average" in summary
+    except Exception as e:
+        assert isinstance(e, (ValueError, TypeError))
