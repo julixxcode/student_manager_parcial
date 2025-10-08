@@ -28,3 +28,18 @@ def test_history_invalid_grade_type():
         assert "average" in summary
     except Exception as e:
         assert isinstance(e, (ValueError, TypeError))
+def test_get_history_prefers_history_over_grades():
+    s = SimpleNamespace(
+        id=1,
+        name="Dual",
+        grades=[2.0, 2.5],
+        history=[{"term": "2024-1", "course": "Estructura de Datos", "grade": 4.0}],
+    )
+    h = get_history(s)
+    assert len(h) == 1  # usa la lista 'history', no 'grades'
+
+def test_history_summary_handles_partial_records():
+    s = SimpleNamespace(id=2, name="Cata", history=[{"term": "T1"}, {"course": "Cálculo"}])
+    res = history_summary(s)
+    assert "average" in res
+    assert res["count"] == 2

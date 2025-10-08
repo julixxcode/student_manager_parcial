@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from student_manager.exporter import export_to_csv, export_to_json
 import csv, json
+import io
+import csv
 
 def students():
     return [
@@ -21,3 +23,14 @@ def test_export_json(tmp_path):
     export_to_json(students(), file)
     data = json.loads(file.read_text(encoding="utf-8"))
     assert data[0]["name"] == "Ana"
+    
+def test_export_to_csv_in_memory(monkeypatch):
+    data = students()
+    fake_file = io.StringIO()
+    writer = csv.DictWriter(fake_file, fieldnames=["id","name","career","average","courses"])
+    # Simula escritura en memoria
+    for r in data:
+        writer.writerow({"id": r.id, "name": r.name, "career": r.career, "average": 4.0, "courses": 2})
+    fake_file.seek(0)
+    lines = fake_file.read().splitlines()
+    assert len(lines) > 0

@@ -31,3 +31,14 @@ def test_group_by_ranges_edge_cases():
     total_students = sum(len(v) for v in grouped.values())
     # No deben perderse estudiantes
     assert total_students == len(data)
+def test_filter_by_average_returns_empty_when_no_match():
+    data = s()
+    res = filter_by_average(data, min_avg=5.0)
+    assert res == []
+
+def test_group_by_ranges_overlapping_bins():
+    data = s()
+    bins = [(0, 3.5), (3.5, 4.5), (4.0, 5.0)]  # intencionalmente solapados
+    grouped = group_by_ranges(data, bins)
+    assert all(isinstance(v, list) for v in grouped.values())
+    assert sum(len(v) for v in grouped.values()) >= len(data)
