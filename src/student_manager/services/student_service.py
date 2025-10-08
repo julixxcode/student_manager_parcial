@@ -114,3 +114,55 @@ def export_to_csv():
             ])
 
     return csv_path
+from pathlib import Path
+from collections import defaultdict
+from student_manager.repositories import student_repo
+from student_manager.domain.student import Student
+
+def get_top_students(limit: int = 5) -> list:
+    """
+    Devuelve el Top N de estudiantes con mejor promedio.
+    """
+    students = student_repo.get_all_students()
+    if not students:
+        return []
+    ordered = sorted(students, key=lambda s: s["average"], reverse=True)
+    return ordered[:limit]
+
+
+def get_average_by_career() -> dict:
+    """
+    Calcula el promedio general de estudiantes agrupado por carrera.
+    """
+    students = student_repo.get_all_students()
+    if not students:
+        return {}
+
+    groups = defaultdict(list)
+    for s in students:
+        groups[s["career"]].append(s["average"])
+
+    result = {career: round(sum(vals) / len(vals), 2) for career, vals in groups.items()}
+    return result
+
+
+def import_from_csv(file_path: Path):
+    """
+    Importa estudiantes desde un archivo CSV con formato:
+    Nombre,Edad,Carrera,Nota1,Nota2,Nota3
+    """
+    if not file_path.exists():
+        raise FileNotFoundError("El archivo CSV no existe.")
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()[1:]  # omitir encabezado
+
+    for line in lines:
+        parts = line.strip().split(",")
+        if len(parts) < 6:
+            continue
+        name, age, career, *grades = parts
+        grades = list(map(float, grades))
+        create_student(name, int(age), career, grades)
+
+    return True
