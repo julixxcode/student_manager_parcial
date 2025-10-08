@@ -1,76 +1,56 @@
+"""
+Gestión de datos persistentes de estudiantes en formato JSON.
+Se encarga de guardar, leer, actualizar y eliminar registros.
+"""
+
 import json
 import os
-from typing import List, Dict, Optional, Any
+from student_manager.config import settings
 
-# Ruta del archivo JSON donde se guardarán los datos
-DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "students.json")
-
-
-def _ensure_file_exists():
-    """Crea el archivo JSON si no existe."""
-    os.makedirs(os.path.dirname(DATA_PATH), exist_ok=True)
-    if not os.path.exists(DATA_PATH):
-        with open(DATA_PATH, "w", encoding="utf-8") as f:
-            json.dump([], f)
-
-
-def load_students() -> List[Dict[str, Any]]:
-    """Carga todos los estudiantes desde el archivo JSON."""
-    _ensure_file_exists()
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
+def _load_data() -> list:
+    """Carga los datos desde el archivo JSON. Si no existe, devuelve una lista vacía."""
+    if not os.path.exists(settings.STUDENTS_FILE):
+        return []
+    with open(settings.STUDENTS_FILE, "r", encoding="utf-8") as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
             return []
 
+def _save_data(data: list):
+    """Guarda la lista de estudiantes en el archivo JSON."""
+    with open(settings.STUDENTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
-def save_students(students: List[Dict[str, Any]]):
-    """Guarda la lista completa de estudiantes en el archivo JSON."""
-    _ensure_file_exists()
-    with open(DATA_PATH, "w", encoding="utf-8") as f:
-        json.dump(students, f, indent=4, ensure_ascii=False)
+def get_all_students() -> list:
+    """Devuelve la lista completa de estudiantes almacenados."""
+    return _load_data()
 
-
-def list_all() -> List[Dict[str, Any]]:
-    """Devuelve todos los estudiantes."""
-    return load_students()
-
-
-def get_by_id(student_id: str) -> Optional[Dict[str, Any]]:
+def get_student_by_id(student_id: str):
     """Busca un estudiante por su ID."""
-    for student in load_students():
-        if student["id"] == student_id:
-            return student
-    return None
+    return next((s for s in _load_data() if s["id"] == student_id), None)
 
+def add_student(student: dict):
+    """Agrega un nuevo estudiante al archivo JSON."""
+    data = _load_data()
+    data.append(student)
+    _save_data(data)
 
-def add(student: Dict[str, Any]) -> Dict[str, Any]:
-    """Agrega un nuevo estudiante al archivo."""
-    students = load_students()
-    students.append(student)
-    save_students(students)
-    return student
-
-
-def delete(student_id: str) -> bool:
-    """Elimina un estudiante por ID. Devuelve True si se eliminó."""
-    students = load_students()
-    new_students = [s for s in students if s["id"] != student_id]
-    if len(new_students) != len(students):
-        save_students(new_students)
-        return True
+def update_student(student_id: str, updated: dict) -> bool:
+    """Actualiza los datos de un estudiante existente."""
+    data = _load_data()
+    for i, s in enumerate(data):
+        if s["id"] == student_id:
+            data[i].update(updated)
+            _save_data(data)
+            return True
     return False
 
-
-def update(student_id: str, **changes) -> bool:
-    """Actualiza los datos de un estudiante."""
-    students = load_students()
-    updated = False
-    for s in students:
-        if s["id"] == student_id:
-            s.update(changes)
-            updated = True
-            break
-    if updated:
-        save_students(students)
-    return updated
+def delete_student(student_id: str) -> bool:
+    """Elimina un estudiante del archivo JSON."""
+    data = _load_data()
+    new_data = [s for s in data if s["id"] != student_id]
+    if len(new_data) == len(data):
+        return False
+    _save_data(new_data)
+    return True
