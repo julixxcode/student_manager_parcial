@@ -1,0 +1,39 @@
+[
+    {
+        "id": "bd460db5",
+        "name": "JULIAN CAMILO MURCIA FERNANDEZ",
+        "age": 21,
+        "career": "INGENIERIA DE SOFTWARE",
+        "grades": [
+            4.0,
+            5.0,
+            2.0
+        ],
+        "average": 3.67,
+        "status": "Aprobado"
+    },
+    {
+        "id": "8d675de7",
+        "name": "Camilo",
+        "age": 20,
+        "career": "Ingeniería",
+        "grades": [
+            4.0,
+            4.5
+        ],
+        "average": 4.25,
+        "status": "Aprobado"
+    },
+    {
+        "id": "75c8e2d3",
+        "name": "Andres",
+        "age": 22,
+        "career": "Diseño",
+        "grades": [
+            4.0,
+            5.0
+        ],
+        "average": 4.5,
+        "status": "Aprobado"
+    }
+]
