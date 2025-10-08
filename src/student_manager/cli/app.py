@@ -135,5 +135,14 @@ def stats():
 # ============================================================
 # 🔹 PUNTO DE ENTRADA
 # ============================================================
+@app.command()
+def export():
+    """Exporta todos los estudiantes registrados a un archivo CSV."""
+    try:
+        csv_path = student_service.export_to_csv()
+        console.print(f"✅ Datos exportados correctamente a: [green]{csv_path}[/green]")
+    except Exception as e:
+        console.print(f"[red]Error al exportar: {e}[/red]")
+
 if __name__ == "__main__":
     app()

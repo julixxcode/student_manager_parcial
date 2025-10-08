@@ -1,44 +1,71 @@
 """
-Capa de servicios: define la lógica de negocio
-y orquesta el flujo entre domain y repositories.
+Capa de servicios del sistema Student Manager.
+Coordina la lógica de negocio entre dominio y repositorio.
+Incluye filtros, estadísticas, exportación CSV y validaciones.
 """
 
+import csv
+from pathlib import Path
 from student_manager.domain.student import Student
 from student_manager.repositories import student_repo
+from student_manager.config import settings
 
-def create_student(name, age, career, grades):
-    """Crea un estudiante validado y lo guarda en el archivo JSON."""
+# ============================================================
+# 🔹 CREAR ESTUDIANTE
+# ============================================================
+def create_student(name: str, age: int, career: str, grades: list[float]) -> dict:
+    """Crea un nuevo estudiante y lo guarda."""
     student = Student(name, age, career, grades)
     student_repo.add_student(student.to_dict())
     return student.to_dict()
 
-def list_students():
-    """Devuelve la lista completa de estudiantes almacenados."""
+# ============================================================
+# 🔹 LISTAR Y BUSCAR
+# ============================================================
+def list_students() -> list:
+    """Devuelve todos los estudiantes registrados."""
     return student_repo.get_all_students()
 
-def find_student(student_id: str):
+
+def find_student(student_id: str) -> dict | None:
     """Busca un estudiante por su ID."""
     return student_repo.get_student_by_id(student_id)
 
-def modify_student(student_id, **kwargs):
-    """Modifica los datos de un estudiante existente."""
-    filtered_data = {k: v for k, v in kwargs.items() if v is not None}
-    return student_repo.update_student(student_id, filtered_data)
+# ============================================================
+# 🔹 MODIFICAR Y ELIMINAR
+# ============================================================
+def modify_student(student_id: str, name=None, age=None, career=None) -> bool:
+    """Modifica los datos básicos del estudiante."""
+    student = find_student(student_id)
+    if not student:
+        return False
 
-def remove_student(student_id: str):
-    """Elimina un estudiante del archivo JSON."""
+    updated = {}
+    if name:
+        updated["name"] = name.title()
+    if age:
+        updated["age"] = int(age)
+    if career:
+        updated["career"] = career.title()
+
+    return student_repo.update_student(student_id, updated)
+
+
+def remove_student(student_id: str) -> bool:
+    """Elimina un estudiante por su ID."""
     return student_repo.delete_student(student_id)
+
+# ============================================================
+# 🔹 FILTRO Y ESTADÍSTICAS
+# ============================================================
 def filter_students(career: str = None, status: str = None) -> list:
     """
     Filtra estudiantes por carrera o estado académico.
-    - career: nombre de la carrera (opcional)
-    - status: 'Aprobado' o 'Reprobado' (opcional)
     """
     students = student_repo.get_all_students()
 
     if career:
         students = [s for s in students if s["career"].lower() == career.lower()]
-
     if status:
         students = [s for s in students if s["status"].lower() == status.lower()]
 
@@ -61,3 +88,29 @@ def get_statistics() -> dict:
         "approved": approved,
         "reproved": reproved
     }
+
+# ============================================================
+# 🔹 EXPORTAR DATOS A CSV
+# ============================================================
+def export_to_csv():
+    """
+    Exporta todos los estudiantes a un archivo CSV en la carpeta /data.
+    Retorna la ruta del archivo exportado.
+    """
+    students = student_repo.get_all_students()
+    if not students:
+        raise ValueError("No hay estudiantes para exportar.")
+
+    csv_path = settings.DATA_DIR / "students_export.csv"
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["ID", "Nombre", "Edad", "Carrera", "Promedio", "Estado", "Creado", "Actualizado"])
+        for s in students:
+            writer.writerow([
+                s["id"], s["name"], s["age"], s["career"],
+                s["average"], s["status"],
+                s.get("created_at", ""), s.get("updated_at", "")
+            ])
+
+    return csv_path
