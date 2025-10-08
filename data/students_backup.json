@@ -1,0 +1,28 @@
+[
+    {
+        "id": "c35dc551",
+        "name": "Julian",
+        "age": 21,
+        "career": "Software",
+        "grades": [
+            4.0,
+            3.5,
+            5.0
+        ],
+        "average": 4.17,
+        "status": "Aprobado"
+    },
+    {
+        "id": "917498b2",
+        "name": "Laura",
+        "age": 19,
+        "career": "Diseño",
+        "grades": [
+            2.5,
+            2.8,
+            3.0
+        ],
+        "average": 2.77,
+        "status": "Reprobado"
+    }
+]
