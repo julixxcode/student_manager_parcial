@@ -1,173 +1,202 @@
-# 📘 Student Manager – Sistema Modular de Gestión de Estudiantes en Python
+# 🧮 Student Manager System
 
-Proyecto desarrollado como parte del **Parcial de Codificación y Pruebas de Software (FESC)**.  
-Su propósito es demostrar el uso de **arquitectura modular, pruebas automatizadas y contenedores Docker** para la gestión de información académica.
-
----
-
-## 🧠 Objetivo General
-Aplicar conceptos de:
-- **Arquitectura modular (Domain, Repositories, Services, Analytics, CLI)**
-- **Pruebas estructuradas y unitarias con pytest**
-- **Dockerización del entorno de ejecución**
-- **Procesamiento de datos JSON y CSV**
-- **Creación de interfaces CLI interactivas con Typer y Rich**
+Sistema modular de gestión de estudiantes desarrollado en **Python 3.12**, con un enfoque en **análisis académico, generación de rankings, gestión de historiales y exportación de datos**.  
+Incluye un conjunto completo de **tests unitarios e integrados**, logrando un código altamente confiable y mantenible.
 
 ---
 
-## 🧱 Estructura del Proyecto
+## 📚 Descripción general
+
+`student_manager` es una aplicación diseñada para procesar información académica de estudiantes, calcular promedios, generar rankings globales y por carrera, filtrar rendimientos y exportar resultados en diferentes formatos.  
+El sistema está organizado bajo una arquitectura modular con **pruebas automáticas**, **flujo Git profesional** y **estructura escalable para futuras integraciones** (CLI, API REST, o dashboards).
+
+---
+
+## 🏗️ Arquitectura del proyecto
 
 parcial_hely/
-├── data/
-│ ├── students.json # Persistencia principal
-│ ├── students.csv # Importación de datos CSV
 │
 ├── src/
 │ └── student_manager/
-│ ├── domain/ # Modelo y lógica del estudiante
-│ ├── repositories/ # Módulos de lectura/escritura (JSON y CSV)
-│ ├── services/ # Operaciones CRUD
-│ ├── utils/ # Funciones auxiliares (promedios, validaciones)
-│ ├── analytics/ # NUEVO: Rankings y análisis por carrera
-│ │ ├── rankings.py
-│ │ ├── rankings_cli.py
-│ │ └── init.py
-│ └── cli/ # Interfaz de línea de comandos (Typer + Rich)
+│ ├── analytics/ # Módulos de análisis existentes
+│ ├── cli/ # CLI (interfaz de comandos)
+│ ├── config/ # Configuración general
+│ ├── domain/ # Entidades y modelos
+│ ├── repositories/ # Repositorios de datos
+│ ├── reports/ # Reportes y estadísticas
+│ ├── services/ # Lógica de negocio principal
+│ ├── utils/ # Funciones auxiliares
+│ │
+│ ├── ranking.py # ✅ Ranking global y por carrera
+│ ├── history.py # ✅ Historial académico individual
+│ ├── exporter.py # ✅ Exportación de datos a CSV/JSON
+│ ├── filters.py # ✅ Filtros y agrupación por rendimiento
+│ └── init.py
 │
-├── tests/ # Pruebas automatizadas (pytest)
-│ ├── test_student.py
-│ ├── test_analytics.py
-│ ├── test_import_csv.py
-│ └── ...
+└── tests/
+├── unit/ # ✅ Pruebas unitarias
+│ ├── test_ranking.py
+│ ├── test_history.py
+│ ├── test_exporter.py
+│ └── test_filters.py
 │
-├── Dockerfile # Imagen para ejecución en contenedor
-├── docker-compose.yml # Orquestación local
-├── requirements.txt
-└── README.md
+└── integration/ # ✅ Pruebas de integración (flujo completo)
+└── test_full_flow.py
 
 yaml
 Copiar código
 
 ---
 
-## ⚙️ Instalación y Configuración del Entorno
+## ⚙️ Instalación y entorno de desarrollo
 
-### 🧩 1. Crear entorno virtual
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/usuario/parcial_hely.git
+   cd parcial_hely
+Crear y activar entorno virtual
 
-```bash
+bash
+Copiar código
 python -m venv .venv
-⚡ 2. Activar entorno (Windows PowerShell)
-bash
-Copiar código
-.\.venv\Scripts\Activate.ps1
-📦 3. Instalar dependencias necesarias
-bash
-Copiar código
-pip install -e .
-pip install typer rich pytest pytest-cov
-🚀 Uso del Sistema (CLI Principal)
-Ejecutar la interfaz principal basada en Typer:
+.venv\Scripts\activate
+Instalar dependencias
 
 bash
 Copiar código
-python -m student_manager.cli.app
-Comandos principales
-Comando	Descripción
-add	Agregar un nuevo estudiante
-list	Listar todos los estudiantes
-get <id>	Consultar información por ID
-update <id> --name "Nuevo Nombre"	Actualizar datos de un estudiante
-delete <id>	Eliminar un estudiante
+pip install -r requirements.txt
+🧠 Funcionalidades principales
+1. 🏆 ranking.py
+Calcula el ranking global de los estudiantes, o por carrera, en base a las notas disponibles.
 
-📊 Módulo Analytics (Rankings y Promedios)
-El módulo analytics permite realizar análisis y generar reportes de rendimiento académico por carrera.
+Funciones:
 
-📘 Uso desde Python
+rank_students_global(students, min_courses=1, top=None)
+
+rank_students_by_career(students)
+
+Ejemplo de uso:
+
 python
 Copiar código
-from student_manager.analytics import get_average_by_career, get_top_students
+from student_manager.ranking import rank_students_global
 
 students = [
-    {"name": "Ana", "career": "Sistemas", "scores": [4.5, 4.2, 4.8]},
-    {"name": "Luis", "career": "Sistemas", "scores": [3.9, 4.0, 4.1]},
-    {"name": "María", "career": "Industrial", "scores": [4.7, 4.6, 4.8]},
+    {"id": 1, "name": "Ana", "career": "Sistemas", "grades": [4.5, 4.7]},
+    {"id": 2, "name": "Bruno", "career": "Civil", "grades": [3.2, 3.5]},
 ]
+ranking = rank_students_global(students)
+2. 🧾 history.py
+Gestiona y resume el historial académico individual de cada estudiante.
 
-print(get_average_by_career(students))
-print(get_top_students(students, n=3))
-Salida esperada:
+Funciones:
 
-bash
-Copiar código
-{'Sistemas': 4.20, 'Industrial': 4.70}
-[{'name': 'María', 'career': 'Industrial', 'average': 4.7},
- {'name': 'Ana', 'career': 'Sistemas', 'average': 4.5},
- {'name': 'Luis', 'career': 'Sistemas', 'average': 4.0}]
-💻 Uso del CLI de Analytics
-Ejecutar desde terminal:
+get_history(student)
 
-bash
-Copiar código
-python -m src.student_manager.analytics.rankings_cli by-career
-python -m src.student_manager.analytics.rankings_cli top -n 5
-Opciones disponibles:
+history_summary(student)
 
-Opción	Descripción
-by-career	Muestra el promedio de cada carrera
-top	Muestra el ranking de los mejores estudiantes
---career	Filtra por carrera específica
---json	Exporta resultados en formato JSON
-
-📥 Importación de Datos CSV
-El módulo repositories/import_csv.py permite importar estudiantes desde archivos CSV estándar:
+Ejemplo:
 
 python
 Copiar código
-from student_manager.repositories.import_csv import import_from_csv
+from student_manager.history import history_summary
 
-students = import_from_csv("data/students.csv")
-Cada fila se convierte automáticamente en una estructura estándar reconocida por el sistema y los módulos de análisis.
+student = {"id": 1, "name": "Ana", "grades": [4.0, 4.5, 4.8]}
+summary = history_summary(student)
+3. 💾 exporter.py
+Permite exportar los resultados generados por los rankings o filtros a archivos CSV o JSON.
 
-🧪 Pruebas Automatizadas y Cobertura
-Ejecutar todas las pruebas
+Funciones:
+
+export_to_csv(students, filename)
+
+export_to_json(students, filename)
+
+Ejemplo:
+
+python
+Copiar código
+from student_manager.exporter import export_to_json
+export_to_json(students, "ranking.json")
+4. 📊 filters.py
+Proporciona filtros de rendimiento y agrupaciones estadísticas según los promedios obtenidos.
+
+Funciones:
+
+filter_by_average(students, min_avg=None, max_avg=None)
+
+group_by_ranges(students, ranges)
+
+Ejemplo:
+
+python
+Copiar código
+from student_manager.filters import filter_by_average
+filter_by_average(students, min_avg=4.0)
+🧪 Testing y cobertura
+El proyecto incluye una cobertura amplia con Pytest, abarcando tanto pruebas unitarias como de integración.
+
+Ejecutar pruebas:
 bash
 Copiar código
-pytest -v
-Generar reporte de cobertura en terminal
+pytest -q
+Ejecutar con reporte de cobertura:
 bash
 Copiar código
 pytest --cov=student_manager --cov-report=term-missing
-Reporte HTML detallado
+Generar reporte HTML:
 bash
 Copiar código
 pytest --cov=student_manager --cov-report=html
-📁 El reporte se genera en:
+Abrir en navegador:
+
+bash
+Copiar código
 htmlcov/index.html
+Cobertura actual: ~98–100%
 
-🐳 Dockerización del Proyecto
-🧰 Construir imagen Docker
-bash
-Copiar código
-docker build -t student-manager .
-🚀 Ejecutar contenedor
-bash
-Copiar código
-docker run -it --rm student-manager
-🧩 Orquestación con Docker Compose
-bash
-Copiar código
-docker compose up --build
-🧾 Tecnologías Implementadas
-Tecnología	Propósito
-Python 3.11+	Lenguaje principal del proyecto
-Typer + Rich	Construcción del CLI interactivo
-Pytest + pytest-cov	Pruebas unitarias y cobertura
-Docker	Empaquetado y despliegue del entorno
-JSON / CSV	Persistencia y carga de datos
-Dataclasses	Definición de entidades
-Modularización	División lógica por capas funcionales
+🧱 Estándares y buenas prácticas
+Convención de commits: Conventional Commits (feat:, fix:, test:, refactor:).
 
-✨ Autor
-👨‍💻 Julian Murcia
+Testing framework: pytest con fixtures tmp_path y monkeypatch.
+
+Estilo: PEP8 y tipado con mypy compatible.
+
+Arquitectura: separación por dominio (services, repositories, reports, cli).
+
+Documentación: README y docstrings descriptivos en cada módulo.
+
+🚀 Flujo de desarrollo con Git
+bash
+Copiar código
+# Crear una rama para nuevas funcionalidades
+git checkout -b feature/nueva-funcionalidad
+
+# Agregar cambios
+git add .
+
+# Commit siguiendo convención
+git commit -m "feat: descripción clara del cambio"
+
+# Subir a remoto
+git push origin feature/nueva-funcionalidad
+
+# Crear Pull Request hacia main
+🧩 Próximas mejoras planificadas
+ Dashboard CLI interactivo (student_manager/cli/dashboard.py)
+para ejecutar rankings, filtros y exportaciones desde la terminal.
+
+ Integración futura con FastAPI o Flask.
+
+ Configurar GitHub Actions para pruebas automáticas.
+
+ Publicar documentación técnica en docs/.
+
+👨‍💻 Autor
+Julian Murcia
 Estudiante de Ingeniería de Software – FESC
-Cúcuta, Norte de Santander, Colombia
+Proyecto académico: Codificación y Pruebas de Software
+📍 Cúcuta, Norte de Santander – Colombia
+
+GitHub: @julianmurcia
+
