@@ -1,31 +1,56 @@
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-from typing import Iterable, List, Dict, Optional, Any
-from collections import defaultdict
-from ..utils.students import get_student_average, get_student_career, get_student_name
 
-@dataclass(frozen=True)
+@dataclass
 class RankedStudent:
-    student: Any
     name: str
     career: str
     average: float
 
-def compute_averages_by_career(students: Iterable[Any]) -> Dict[str, float]:
-    sums, counts = defaultdict(float), defaultdict(int)
-    for s in students:
-        career = get_student_career(s) or "Sin carrera"
-        avg = get_student_average(s)
-        sums[career] += avg
-        counts[career] += 1
-    return {c: (sums[c] / counts[c]) if counts[c] else 0.0 for c in sums}
 
-def compute_rankings(students: Iterable[Any], *, career: Optional[str] = None, top_n: int = 5) -> List[RankedStudent]:
-    rows: List[RankedStudent] = []
+def compute_averages_by_career(students: List[Any]) -> Dict[str, float]:
+    """
+    Calcula el promedio general por carrera.
+    """
+    data: Dict[str, List[float]] = {}
+
     for s in students:
-        c = get_student_career(s) or "Sin carrera"
-        if career and c != career:
+        # Soporta tanto objetos como diccionarios
+        career = getattr(s, "career", None) or s.get("career") or "Sin carrera"
+        scores = getattr(s, "scores", None) or s.get("scores", [])
+        if scores:
+            data.setdefault(career, []).extend(scores)
+
+    # Evita división por cero
+    return {c: (sum(vals) / len(vals)) if vals else 0.0 for c, vals in data.items()}
+
+
+def compute_rankings(
+    students: List[Any],
+    career: Optional[str] = None,
+    top_n: int = 5
+) -> List[RankedStudent]:
+    """
+    Genera un ranking de estudiantes ordenado por promedio.
+    """
+    results: List[RankedStudent] = []
+
+    for s in students:
+        # Admite tanto dict como objeto
+        name = getattr(s, "name", None) or s.get("name")
+        student_career = getattr(s, "career", None) or s.get("career")
+        scores = getattr(s, "scores", None) or s.get("scores", [])
+
+        # Ignorar sin notas o sin nombre
+        if not name or not scores:
             continue
-        avg = get_student_average(s)
-        rows.append(RankedStudent(s, get_student_name(s), c, avg))
-    rows.sort(key=lambda r: (-r.average, r.name.lower()))
-    return rows[: max(1, int(top_n))]
+
+        # Filtro por carrera (insensible a mayúsculas)
+        if career and student_career and student_career.lower() != career.lower():
+            continue
+
+        avg = sum(scores) / len(scores)
+        results.append(RankedStudent(name, student_career, avg))
+
+    # Orden descendente por promedio
+    return sorted(results, key=lambda r: r.average, reverse=True)[:top_n]
